@@ -1,0 +1,30 @@
+{
+  "name": "expressjs-http-events",
+  "version": "1.0.0",
+  "description": "Utility to manage http events in expressjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/jest",
+    "test-unit-all": "npm run test -- unit"
+  },
+  "repository": "git://github.com/isaacSennerholt/expressjs-http-events.git",
+  "keywords": [
+    "events",
+    "express",
+    "expressjs",
+    "nodejs",
+    "req",
+    "http",
+    "https",
+    "http request",
+    "http events"
+  ],
+  "author": "isaacsennerholt <isaac.sennerholt@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "20.0.4"
+  },
+  "dependencies": {
+    "simple-nodejs-request": "^1.0.0"
+  }
+}
