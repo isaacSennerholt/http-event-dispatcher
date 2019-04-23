@@ -1,7 +1,7 @@
 {
-  "name": "expressjs-http-events",
+  "name": "http-events",
   "version": "1.0.0",
-  "description": "Utility to manage http events in expressjs",
+  "description": "Utility to dispatch event objects using http requests",
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/jest",
