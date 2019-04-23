@@ -1,53 +1,48 @@
+const crypto = require('crypto')
 const httpRequest = require('simple-nodejs-request')
 
-module.exports = (namespace, eventHttpConfig) => {
-  
-  /**
-  * slice(2) to remove initial application/context/service mount path
-  * e.g /x2x/api/products/1 (x2x), /api/products/1, (api)
-  */
-  function createOrigin(originalUrl, method) {
-    const resourcePath = originalUrl.split('/').slice(2).join('/')
-    const modifiedResourcePath = resourcePath.replace(/\d+/g, 'x')
-    const modifiedOriginalUrl = originalUrl.replace(resourcePath, modifiedResourcePath)
-    return [namespace, method, modifiedOriginalUrl].join('.').toLowerCase()
-  }
-  
-  function createEvent(req) {
-    const {originalUrl, method, params, query, body} = req
-    return {
-      origin: createOrigin(originalUrl, method),
-      resource_identifiers: {...query, ...params},
-      created_at: Date.now(),
-      data: body
-    }
-  }
-  
-  function createListener() {
-    return (req, res, next) => {
-      if (!eventHttpConfig) return next()
-  
-      const {headers} = req
-      const {url} = eventHttpConfig
-      const options = {
-        method: 'POST',
-        headers,
-        body: createEvent(req)
-      }
+function assertConfigShape(config, requiredConfigurations = []) {
+  if (!config) throw new Error('Event module configuration is missing.')
+  return requiredConfigurations.forEach(requiredConfiguration => {
+    const isConfigured = Object.keys(config).includes(requiredConfiguration)
+    if (!isConfigured) throw new Error(`"${requiredConfiguration}" is missing in configuration.`)
+    return
+  })
+}
 
-      res.on('finish', () => {
-        const {statusCode} = res
-        if (statusCode == '200' || statusCode == '201') httpRequest(url, options)
-      })
-  
-      next()
+module.exports = config => {
+  assertConfigShape(config, ['namespace', 'url', 'secret'])
+  const {namespace, url, secret} = config
+
+  function createEvent(type, payload) {
+    return {
+      type,
+      created_at: Date.now(),
+      data: payload
     }
+  }
+
+  function createDigest(eventObject) {
+    return crypto
+    .createHmac('sha256', secret)
+    .update(Buffer.from(JSON.stringify(eventObject)))
+    .digest('base64')
+  }
+
+  function dispatch(eventType, payload) {
+    const eventObject = createEvent(eventType, payload)
+    const digest = createDigest(eventObject)
+    return httpRequest(url, {
+      method: 'POST',
+      headers: {
+        [`${namespace}-hmac-sha256`]: digest,
+      },
+      body: eventObject
+    })
   }
   
   return {
-    createOrigin,
-    createEvent,
-    createListener
+    dispatch
   }
   
 }
