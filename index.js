@@ -30,7 +30,9 @@ module.exports = config => {
       .digest('base64')
   }
 
-  function dispatch(eventType, { headers = {}, data = {} }) {
+  function dispatch(eventType, dispatchConfig) {
+    assertConfigShape(dispatchConfig, ['data'])
+    const { data, headers = {} } = dispatchConfig
     const eventObject = createEvent(eventType, data)
     const digest = createDigest(eventObject)
     return httpRequest(url, {
