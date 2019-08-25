@@ -1,8 +1,8 @@
 {
   "name": "http-events",
   "version": "1.0.0",
-  "description": "Utility to dispatch event objects using http requests",
-  "main": "index.js",
+  "description": "Utility to dispatch event objects using http requests.",
+  "main": "lib/httpEvents.js",
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "test-unit-all": "npm run test -- unit"
